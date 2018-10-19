@@ -177,7 +177,9 @@ int bitAnd(int x, int y) {
  */
 int evenBits(void) {
   int a = 0x55;
-  return (a<<24)|(a<<16)|(a<<8)|(a);
+  a = (a<<8)+a;
+  a = (a<<16)+a;
+  return a;
 }
 /* 
  * fitsShort - return 1 if x can be represented as a 
@@ -200,8 +202,9 @@ int fitsShort(int x) {
  */
 int isTmax(int x) {
   
-  return !(((x+1)^x)+1)&(!!(~x));
-  //return !((~(1<<31))^x)
+  //return !(((x+1)^x)+1)&(!!(~x));
+  //Take '|' to replace  '&', two '+' combine to one '+' 
+  return !(((x+x)+2)|(!(~x)));
 }
 /* 
  * minusOne - return a value of -1 
@@ -234,9 +237,10 @@ int upperBits(int n) {
  */
 int allEvenBits(int x) {
   int m= 0x55;
-	
-	m = (m<< 24)|(m<<16)|(m<<8)|m;
+	m = (m<<8)|m;
+  m = (m<<16)|m;
 	return !((x&m)^m);
+  
 }
 /* 
  * byteSwap - swaps the nth byte and the mth byte
@@ -276,9 +280,8 @@ int copyLSB(int x) {
 int divpwr2(int x, int n) {
     
     int sign_mark = (x>>31);
-    int k = (0x1<<n)+(~0);//优先考虑如何做出一个左(n-1)位为1的数
+    int k = (0x1<<n)+(~0);//优先考虑如何做出一个右(n)位为1的数
     int right_n_1 = sign_mark & k;
-
     return (x+right_n_1)>>n;
 }
 /* 
@@ -300,7 +303,9 @@ int leastBitPos(int x) {
  */
 int oddBits(void) {
   int t = 0xaa;
-  return (t<<24)|(t<<16)|(t<<8)|t;
+  t = (t<<8)|t;
+  t = (t<<16)|t;
+  return t;
 }
 //Rating:3
 /* 
@@ -333,10 +338,23 @@ int isLess(int x, int y) {
   //int x_minus_y = x + ~y +1;
 
   //return !(x_minus_y^((x^y)&(x_minus_y^y)));
-int xsign = (x >> 31) & 0x1;
-int ysign = (y >> 31) & 0x1;
-return (xsign & ~ysign) | !(((~x+y)>>31)&0x1) & !(~xsign & ysign); 
+  //  int x_sign = (x >> 31) & 0x1;
+  //  int y_sign = (y >> 31) & 0x1;
+  //  int sign_sub = ((x + (~y))+1)>>31;
+    int x_sign = (x >> 31) ;
+    int y_sign = (y >> 31) ;
+    int sign_sub = ((x + (~y))+1)>>31;
+    int result_if_sign_same = (sign_sub)&(!(x_sign^y_sign));
+    int result_if_sign_diff = x_sign&(!y_sign);
+    return result_if_sign_same|result_if_sign_diff;
 
+    /*
+      3 conditions:
+      1. x<0 , y>0;
+      2. x>0,y>0,x-y<0;
+      3.x>0,y<0;
+      1 or 2 fits while 3 doesn't  fit
+      */
 }
 /* 
  * logicalShift - shift x to the right by n, using a logical shift
@@ -347,19 +365,33 @@ return (xsign & ~ysign) | !(((~x+y)>>31)&0x1) & !(~xsign & ysign); 
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return 2;
+  //Make a int that first n bits are "0", others are "1".
+  int mask = ~((0x1<<31)>>n<<1);
+  return (mask)&(x>>n);
 }
 /*
  * satMul2 - multiplies by 2, saturating to Tmin or Tmax if overflow
  *   Examples: satMul2(0x30000000) = 0x60000000
  *             satMul2(0x40000000) = 0x7FFFFFFF (saturate to TMax)
- *             satMul2(0x60000000) = 0x80000000 (saturate to TMin)
+ *             satMul2(0x60000000) = 0x7FFFFFFF (saturate to TMax)
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 20
  *   Rating: 3
  */
 int satMul2(int x) {
-  return 2;
+  /*
+  int get_sign = x >> 31; //Make all bits the same as the first sign bit;
+  int xMul2 = x<<1;
+  int tmin = 1<<31;
+  int check_same_sign = (xMul2^x)>>31;
+  int result = ((~check_same_sign)&xMul2) | ((tmin+(~get_sign))&check_same_sign);
+  return result;
+  */
+  int x2 = x<<1;
+  int flag = (x^x2)>>31;
+  return (((x2>>31)^(flag<<31))& flag) | (x2 & (~flag));
+  
+ 
 }
 /* 
  * subOK - Determine if can compute x-y without overflow
@@ -370,7 +402,9 @@ int satMul2(int x) {
  *   Rating: 3
  */
 int subOK(int x, int y) {
-  return 2;
+  // x<0,y>0 but sub>0  or x>0,y<0 ,sub<0;
+  int sub = x + (~y) + 1;
+  return !(((sub^x)&(y^x))>>31);
 }
 //Rating:4
 /* 
@@ -391,7 +425,14 @@ int bang(int x) {
  *   Rating: 4
  */
 int bitParity(int x) {
-  return 2;
+  //Every step fold the bits
+  x = (x>>16)^x;
+  x = (x>>8)^x;
+  x = (x>>4)^x;
+  x = (x>>2)^x;
+  x = (x>>1)^x;
+  
+  return (x&0x1);
 }
 /*
  * isPower2 - returns 1 if x is a power of 2, and 0 otherwise
@@ -402,10 +443,10 @@ int bitParity(int x) {
  *   Rating: 4
  */
 int isPower2(int x) {
-  int t = (x & (x + ~0));
-    int neg = x >> 31;
-    int is_zero = !x;
-    return !(neg | is_zero | t);
+    int check_if_only_1 = (x & (x + ~0));
+    int check_negtive = x >> 31;
+    int check_zero = !x;
+    return !(check_zero | check_negtive | check_if_only_1);
 }
 //Extra
 /* 
@@ -418,7 +459,58 @@ int isPower2(int x) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+  
+   
+    /*
+    int sign=x>>31&1;
+    int i;
+    int exponent; 
+    int fraction; 
+    int delta;
+    int fraction_mask;
+    if(x==0)//||x==0x8000000)
+        return x;
+    else if(x==0x80000000)
+        exponent=158;
+    else{
+        if (sign)//turn negtive to positive
+            x = -x;
+        i = 30;
+        while ( !(x >> i) )//see how many bits do x have(rightshift until 0) 
+            i--;
+        //printf("%x %d\n",x,i);
+        exponent = i + 127;
+        x = x << (31 - i);//clean all those zeroes of high bits
+        fraction_mask = 0x7fffff;//(1 << 23) - 1;
+        fraction = fraction_mask & (x >> 8);//right shift 8 bits to become the fraction,sign and exp have 8 bits total
+        x = x & 0xff;
+        delta = x > 128 || ((x == 128) && (fraction & 1));//if lowest 8 bits of x is larger than a half,or is 1.5,round up 1
+        fraction += delta;
+        if(fraction >> 23) {//if after rounding fraction is larger than 23bits
+            fraction &= fraction_mask;
+            exponent += 1;
+        }
+    }
+    return (sign<<31)|(exponent<<23)|fraction;
+    */
+   int e = 158;
+    int mask = 1<<31;
+    int sign = x&mask;
+    int frac;
+    if (x == mask)
+        return mask | (158<<23);
+    if (!x)
+        return 0;
+    if (sign)
+        x = ~x + 1;
+    while (!(x&mask)) {
+        x = x<<1;
+        e = e -1;
+    }
+    frac = (x&(~mask)) >> 8;
+    if (x&0x80 && ((x&0x7F) > 0 || frac&1))
+        frac = frac + 1;
+    return sign + (e<<23) + frac;
 }
 /*
  * leftBitCount - returns count of number of consective 1's in
@@ -429,5 +521,60 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 int leftBitCount(int x) {
-  return 2;
+  /*
+    int check_all_1,num_of_1;
+    int sum1,sum2,sum3,sum4,sum5;
+    check_all_1 = !((x >> 16) + 1);
+    num_of_1 = check_all_1 << 4;
+    sum1=num_of_1;
+    x = x << num_of_1;
+    
+    check_all_1 = !((x >> 24) + 1);
+    num_of_1 = check_all_1 << 3;
+    sum2=num_of_1;
+    x = x << num_of_1;
+    
+    check_all_1 = !((x >> 28) + 1);
+    num_of_1 = check_all_1 << 2;
+    sum3=num_of_1;
+    x = x << num_of_1;
+    
+    check_all_1 = !((x >> 30) + 1);
+    num_of_1 = check_all_1 << 1;
+    sum4=num_of_1;
+    x = x << num_of_1;
+    
+    check_all_1 = !((x >> 31) + 1);
+    num_of_1 = check_all_1;
+    sum5=num_of_1;
+    x = x << num_of_1;      
+    
+    return ((sum1+sum2+sum3+sum4+sum5) + (x >> 31 & 0x1)); 
+    */
+     //make count dependent on position. 
+    int temp = x;
+	int result;	
+	int shift;
+	int one = !(~x); 
+	// Check the top 16 bits and add them to our result if they exist
+	result = !(~(temp>>16)) << 4; //if there are no ones in the front, we just shift temp by a huge number, so temp is zero. 
+	temp = temp << result;
+	// check the remaining 8 bits (32-24)
+	shift = !(~(temp >> 24)) << 3;
+	temp = temp << shift;
+	result = result | shift;
+	// remaining 4 bits
+	shift = !(~(temp>>28)) << 2;
+	temp = temp << shift;
+	result = result | shift;
+	// remaining 2 bits
+	shift = !(~(temp >> 30)) << 1;
+	temp = temp << shift;
+	result = result | shift;
+	// remaining 1 bits
+	result= result ^ (1&((temp>>31)));
+
+	//rememer to add one if we have 32 on bits
+	return result + one;
+
 }

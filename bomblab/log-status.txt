@@ -1,0 +1,9 @@
+Fri Oct 19 17:14:19 2018:bomblab.pl:Bomblab daemon started on CubeMac.local
+Fri Oct 19 17:14:19 2018:bomblab.pl:Detected 0 instances of bomblab-requestd.pl
+Fri Oct 19 17:14:19 2018:bomblab.pl:Restarting bomblab-requestd.pl.
+Fri Oct 19 17:14:19 2018:bomblab.pl:Detected 0 instances of bomblab-resultd.pl
+Fri Oct 19 17:14:19 2018:bomblab.pl:Restarting bomblab-resultd.pl.
+Fri Oct 19 17:14:19 2018:bomblab.pl:Detected 0 instances of bomblab-reportd.pl
+Fri Oct 19 17:14:19 2018:bomblab.pl:Restarting bomblab-reportd.pl.
+Fri Oct 19 17:14:19 2018:bomblab-requestd.pl:Request server started on changeme.ics.cs.cmu.edu:15213
+Fri Oct 19 17:14:19 2018:bomblab-resultd.pl:Results server started on CubeMac.local:15214
