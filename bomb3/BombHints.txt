@@ -1,0 +1,12 @@
+We have to stand with our North Korean allies.
+0 1 1 2 3 5
+0 631
+11 18
+beldog
+2 5 6 4 3 1
+
+
+To Secret Phase:
+Add "DrEvil" to "11 18"
+Secret Answer :
+1001

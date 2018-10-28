@@ -325,7 +325,7 @@ Disassembly of section .text:
   400ef4:	be 90 24 40 00       	mov    $0x402490,%esi
   400ef9:	e8 e0 03 00 00       	callq  4012de <strings_not_equal>
   400efe:	85 c0                	test   %eax,%eax
-  400f00:	74 05                	je     400f07 <phase_1+0x17>
+  400f00:	74 05                	je     400f07x  <phase_1+0x17>
   400f02:	e8 3d 06 00 00       	callq  401544 <explode_bomb>
   400f07:	48 83 c4 08          	add    $0x8,%rsp
   400f0b:	c3                   	retq   
@@ -841,7 +841,7 @@ Disassembly of section .text:
   401581:	48 8d 4e 04          	lea    0x4(%rsi),%rcx
   401585:	48 8d 46 14          	lea    0x14(%rsi),%rax
   401589:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
-  40158e:	48 8d 46 10          	lea    0x10(%rsi),%rax
+  40158e:	48 8d 46 10          	lea    0x10(%rsi),%raxads
   401592:	48 89 04 24          	mov    %rax,(%rsp)
   401596:	4c 8d 4e 0c          	lea    0xc(%rsi),%r9
   40159a:	4c 8d 46 08          	lea    0x8(%rsi),%r8
