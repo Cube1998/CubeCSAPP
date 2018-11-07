@@ -176,7 +176,7 @@ End of assembler dump.
 
 
 madui ersnf otvbylSo you think you can stop the bomb with ctrl-c, do you?
-
+x /s 0x402530
 x /s 0x4024e6
 devils
 25d4f7
